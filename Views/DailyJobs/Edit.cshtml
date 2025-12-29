@@ -1,0 +1,311 @@
+﻿@model DailyJobTracker.Models.DailyJob
+
+@{
+    ViewData["Title"] = "Edit Job";
+}
+
+<style>
+    /* Page-level styling for a modern, professional look */
+    .job-card {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+        .job-card .card-header {
+            background: linear-gradient(90deg,#0d6efd 0%, #6610f2 100%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: .2px;
+        }
+
+    .form-section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: .5rem;
+        color: #333;
+    }
+
+    .small-muted {
+        font-size: .85rem;
+        color: #ffffff; /* changed to white */
+        opacity: 0.9;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 .15rem rgba(13,110,253,.12);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg,#0d6efd,#6610f2);
+        border: 0;
+    }
+
+    .meta-row .form-group {
+        margin-bottom: .75rem;
+    }
+
+    @@media (min-width: 992px) {
+        .left-col {
+            border-right: 1px solid #eef0f3;
+            padding-right: 2rem;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="card job-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0">Edit Job</h4>
+                <div class="small-muted">Update job details and save changes</div>
+            </div>
+            <div>
+                <a asp-action="Index" class="btn btn-sm btn-light">Back to List</a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" class="row g-3">
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Left column: core job info -->
+                <div class="col-12 col-lg-6 left-col">
+                    <div class="form-section-title">Job Details</div>
+
+                    <div class="row meta-row">
+                        <div class="col-12 form-group">
+                            <label asp-for="WorkDate" class="form-label"></label>
+                            <input asp-for="WorkDate" class="form-control" type="date" />
+                            <span asp-validation-for="WorkDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Shift" class="form-label"></label>
+                            <select asp-for="Shift" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Shifts, "ShiftName", "ShiftName", Model.Shift))">
+                                <option value="">-- Select Shift --</option>
+                            </select>
+                            <span asp-validation-for="Shift" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="EngineerName" class="form-label"></label>
+                            <select asp-for="EngineerName" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Engineers, "Name", "Name", Model.EngineerName))">
+                                <option value="">-- Select Engineer --</option>
+                            </select>
+                            <span asp-validation-for="EngineerName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="CaseId" class="form-label"></label>
+                            <input asp-for="CaseId" class="form-control" placeholder="Enter case / ticket id" />
+                            <span asp-validation-for="CaseId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="ActivityStartTime" class="form-label"></label>
+                            <input asp-for="ActivityStartTime" class="form-control" type="time" />
+                            <span asp-validation-for="ActivityStartTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="ActivityEndTime" class="form-label"></label>
+                            <input asp-for="ActivityEndTime" class="form-control" type="time" />
+                            <span asp-validation-for="ActivityEndTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="ActivityDetails" class="form-label"></label>
+                            <textarea asp-for="ActivityDetails" class="form-control" rows="4" placeholder="Describe the activity performed"></textarea>
+                            <span asp-validation-for="ActivityDetails" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right column: classification, company, status, notes -->
+                <div class="col-12 col-lg-6">
+                    <div class="form-section-title">Classification & Notes</div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Category" class="form-label"></label>
+                            <select id="Category" asp-for="Category" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Categories, Model.Category))">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="SubCategory" class="form-label"></label>
+                            <select id="SubCategory" asp-for="SubCategory" class="form-select">
+                                <option value="">-- Select SubCategory --</option>
+                            </select>
+                            <span asp-validation-for="SubCategory" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="CaseType" class="form-label"></label>
+                            <select asp-for="CaseType" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.CaseTypes, "TypeName", "TypeName", Model.CaseType))">
+                                <option value="">-- Select Case Type --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="CasePriority" class="form-label"></label>
+                            <select asp-for="CasePriority" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.CasePriorities, "PriorityName", "PriorityName", Model.CasePriority))">
+                                <option value="">-- Select Priority --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="CompanyName" class="form-label"></label>
+                            <select asp-for="CompanyName" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Companies, "Name", "Name", Model.CompanyName))">
+                                <option value="">-- Select Company --</option>
+                            </select>
+                            <span asp-validation-for="CompanyName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Statuses, "StatusName", "StatusName", Model.Status))">
+                                <option value="">-- Select Status --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="HandoverReason" class="form-label"></label>
+                            <input asp-for="HandoverReason" class="form-control" />
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="ElevationCallReason" class="form-label"></label>
+                            <input asp-for="ElevationCallReason" class="form-control" />
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="ITSMUpdate" class="form-label"></label>
+                            <textarea asp-for="ITSMUpdate" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label asp-for="Remarks" class="form-label"></label>
+                            <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="col-6 form-group">
+                            <label asp-for="CreatedAt" class="form-label"></label>
+                            <input asp-for="CreatedAt" class="form-control" readonly />
+                        </div>
+                        <div class="col-6 form-group">
+                            <label asp-for="UpdatedAt" class="form-label"></label>
+                            <input asp-for="UpdatedAt" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full width action row -->
+                <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    <input type="submit" value="Save Changes" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+    <div id="operationToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="operationToastBody"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Load subcategories for a category and optionally pre-select one
+        function loadSubcategories(categoryName, selectedSubCategory) {
+            var subCategorySelect = document.getElementById('SubCategory');
+            subCategorySelect.innerHTML = '<option>Loading...</option>';
+
+            if (!categoryName) {
+                subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                return;
+            }
+
+            fetch('/DailyJobs/GetSubCategories?categoryName=' + encodeURIComponent(categoryName))
+                .then(response => response.json())
+                .then(data => {
+                    subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                    data.forEach(function (subcat) {
+                        var opt = document.createElement('option');
+                        opt.value = subcat;
+                        opt.textContent = subcat;
+                        if (selectedSubCategory && subcat === selectedSubCategory) {
+                            opt.selected = true;
+                        }
+                        subCategorySelect.appendChild(opt);
+                    });
+                })
+                .catch(() => {
+                    subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                });
+        }
+
+        // Toast helper
+        function showToast(message, type) {
+            var toastEl = document.getElementById('operationToast');
+            var toastBody = document.getElementById('operationToastBody');
+
+            toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+            if (type === 'success') toastEl.classList.add('text-bg-success');
+            else if (type === 'error') toastEl.classList.add('text-bg-danger');
+            else toastEl.classList.add('text-bg-warning');
+
+            toastBody.textContent = message;
+
+            var toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var categorySelect = document.getElementById('Category');
+            var selectedCategory = categorySelect ? categorySelect.value : '';
+            var selectedSubCategory = '@(Model.SubCategory ?? "")';
+
+            if (selectedCategory) {
+                loadSubcategories(selectedCategory, selectedSubCategory);
+            }
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function () {
+                    loadSubcategories(this.value, null);
+                });
+            }
+
+            // TempData-driven toast messages
+            var successMsg = '@(TempData["Success"] ?? "")'.trim();
+            var errorMsg = '@(TempData["Error"] ?? "")'.trim();
+
+            if (successMsg) {
+                showToast(successMsg, 'success');
+            } else if (errorMsg) {
+                showToast(errorMsg, 'error');
+            }
+        });
+    </script>
+}

@@ -1,0 +1,129 @@
+﻿@model IEnumerable<DailyJobTracker.Models.DailyJob>
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    // Helper function to map status names to Bootstrap colors
+    Func<string, string> getStatusColor = status =>
+    {
+        switch (status?.ToLower())
+        {
+            case "in-progress":
+                return "bg-warning"; // amber
+            case "open":
+                return "bg-danger"; // light red
+            case "resolved":
+                return "bg-success"; // green
+            case "waiting for approval":
+                return "bg-info"; // yellowish (can override with custom CSS if needed)
+            default:
+                return "bg-secondary"; // fallback gray
+        }
+    };
+}
+
+<div class="row mb-4">
+    <!-- Total Jobs -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary shadow h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Jobs</h5>
+                <h2>@ViewBag.TotalJobs</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Status Cards -->
+    @if (ViewBag.StatusCounts != null && ((IEnumerable<dynamic>)ViewBag.StatusCounts).Any())
+    {
+        @foreach (var status in ViewBag.StatusCounts)
+        {
+            var cardColor = getStatusColor((string)status.StatusName);
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-white @cardColor shadow h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@status.StatusName Jobs</h5>
+                        <h2>@status.Count</h2>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-md-12">
+            <div class="alert alert-warning text-center fw-bold">
+                Oppss! No Status Data Available
+            </div>
+        </div>
+    }
+
+    <!-- Total Time -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-dark shadow h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Time</h5>
+                <h2>@ViewBag.TotalTime</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Jobs Table -->
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Engineer</th>
+            <th>Case ID</th>
+            <th>Category</th>
+            <th>SubCategory</th>
+            <th>Case Type</th>
+            <th>Priority</th>
+            <th>Company</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Break</th>
+            <th>Time Track</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="14" class="text-center text-danger fw-bold">
+                    Oppss! No Data Available to Display
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.WorkDate.ToShortDateString()</td>
+                    <td>@item.EngineerName</td>
+                    <td>@item.CaseId</td>
+                    <td>@item.Category</td>
+                    <td>@item.SubCategory</td>
+                    <td>@item.CaseType</td>
+                    <td>@item.CasePriority</td>
+                    <td>@item.CompanyName</td>
+                    <td>@item.ActivityStartTime.ToShortTimeString()</td>
+                    <td>@item.ActivityEndTime.ToShortTimeString()</td>
+                    <td>@item.BreakDuration</td>
+                    <td>@item.TimeTrack</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

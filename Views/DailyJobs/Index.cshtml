@@ -1,0 +1,129 @@
+﻿@model IEnumerable<DailyJobTracker.Models.DailyJob>
+
+@{
+    ViewData["Title"] = "Daily Job Tracker";
+    TimeSpan total = TimeSpan.Zero;
+}
+
+<h1>Daily Job Tracker</h1>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="row">
+        <!-- Work Date -->
+        <div class="col-md-3">
+            <label for="workDate">Work Date</label>
+            <input type="date" id="workDate" name="workDate" class="form-control"
+                   value="@ViewBag.SelectedWorkDate" />
+        </div>
+
+        <!-- Engineer dropdown -->
+        <div class="col-md-3">
+            <label for="engineerName">Engineer</label>
+            <select id="engineerName" name="engineerName" class="form-control">
+                <option value="">-- All Engineers --</option>
+                @foreach (var eng in (IEnumerable<string>)ViewBag.Engineers)
+                {
+                    <option value="@eng" selected="@(ViewBag.SelectedEngineer == eng)">@eng</option>
+                }
+            </select>
+        </div>
+
+        <!-- Status dropdown -->
+        <div class="col-md-3">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" name="statusFilter" class="form-control">
+                <option value="">-- All Statuses --</option>
+                @foreach (var st in (IEnumerable<string>)ViewBag.Statuses)
+                {
+                    <option value="@st" selected="@(ViewBag.SelectedStatus == st)">@st</option>
+                }
+            </select>
+        </div>
+
+        <!-- Company dropdown -->
+        <div class="col-md-3">
+            <label for="companyName">Company</label>
+            <select id="companyName" name="companyName" class="form-control">
+                <option value="">-- All Companies --</option>
+                @foreach (var comp in (IEnumerable<string>)ViewBag.Companies)
+                {
+                    <option value="@comp" selected="@(ViewBag.SelectedCompany == comp)">@comp</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary me-2">Filter</button>
+            <a asp-action="Index" class="btn btn-secondary me-2">Clear</a>
+            <a asp-action="Create" class="btn btn-success me-2">+ Add Entry</a>
+            <a asp-action="Dashboard" class="btn btn-dark">⬅ Back to Dashboard</a>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Engineer</th>
+            <th>Case ID</th>
+            <th>Category</th>
+            <th>SubCategory</th>
+            <th>Case Type</th>
+            <th>Priority</th>
+            <th>Company</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Break</th>
+            <th>Time Track</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="14" class="text-center text-danger fw-bold">
+                    Oppss! No Data Available to Display
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                if (item.TimeTrack.HasValue)
+                {
+                    total += item.TimeTrack.Value;
+                }
+                <tr>
+                    <td>@item.WorkDate.ToShortDateString()</td>
+                    <td>@item.EngineerName</td>
+                    <td>@item.CaseId</td>
+                    <td>@item.Category</td>
+                    <td>@item.SubCategory</td>
+                    <td>@item.CaseType</td>
+                    <td>@item.CasePriority</td>
+                    <td>@item.CompanyName</td>
+                    <td>@item.ActivityStartTime.ToShortTimeString()</td>
+                    <td>@item.ActivityEndTime.ToShortTimeString()</td>
+                    <td>@item.BreakDuration</td>
+                    <td>@item.TimeTrack</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <strong>Total Time:</strong> @total
+</div>

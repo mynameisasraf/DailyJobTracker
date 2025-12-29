@@ -1,0 +1,175 @@
+﻿@model DailyJobTracker.Models.DailyJob
+
+@{
+    ViewData["Title"] = "Add Job";
+}
+
+<h1>Add Job</h1>
+
+<form asp-action="Create">
+    <!-- Row 1: Work Date | Engineer Name | Shift -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="WorkDate" class="control-label"></label>
+            <input asp-for="WorkDate" class="form-control" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="WorkDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="EngineerName" class="control-label"></label>
+            <select asp-for="EngineerName" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.Engineers, "Name", "Name"))">
+                <option value="">-- Select Engineer --</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Shift" class="control-label"></label>
+            <select asp-for="Shift" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.Shifts, "ShiftName", "ShiftName"))">
+                <option value="">-- Select Shift --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Row 2: Case ID | Category | Sub-Category -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="CaseId" class="control-label"></label>
+            <input asp-for="CaseId" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Category" class="control-label"></label>
+            <select id="Category" asp-for="Category" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.Categories))">
+                <option value="">-- Select Category --</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SubCategory" class="control-label"></label>
+            <select id="SubCategory" asp-for="SubCategory" class="form-control">
+                <option value="">-- Select SubCategory --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Row 3: Case Priority | Case Type | Status -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="CasePriority" class="control-label"></label>
+            <select asp-for="CasePriority" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.CasePriorities, "PriorityName", "PriorityName"))">
+                <option value="">-- Select Priority --</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="CaseType" class="control-label"></label>
+            <select asp-for="CaseType" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.CaseTypes, "TypeName", "TypeName"))">
+                <option value="">-- Select Case Type --</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Status" class="control-label"></label>
+            <select asp-for="Status" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.Statuses, "StatusName", "StatusName"))">
+                <option value="">-- Select Status --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Row 4: Activity Start | Activity End | Break Duration -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="ActivityStartTime" class="control-label"></label>
+            <input asp-for="ActivityStartTime" class="form-control" type="time" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="ActivityEndTime" class="control-label"></label>
+            <input asp-for="ActivityEndTime" class="form-control" type="time" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="BreakDuration" class="control-label"></label>
+            <input asp-for="BreakDuration" class="form-control" type="time" />
+        </div>
+    </div>
+
+    <!-- Row 5: Company Name -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label asp-for="CompanyName" class="control-label"></label>
+            <select asp-for="CompanyName" class="form-control"
+                    asp-items="@(new SelectList(ViewBag.Companies, "Name", "Name"))">
+                <option value="">-- Select Company --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Row 6: Activity Details -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label asp-for="ActivityDetails" class="control-label"></label>
+            <textarea asp-for="ActivityDetails" class="form-control" rows="4"></textarea>
+        </div>
+    </div>
+
+    <!-- Remaining fields -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="HandoverReason" class="control-label"></label>
+            <input asp-for="HandoverReason" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="ElevationCallReason" class="control-label"></label>
+            <input asp-for="ElevationCallReason" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="ITSMUpdate" class="control-label"></label>
+            <textarea asp-for="ITSMUpdate" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Remarks" class="control-label"></label>
+            <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Cascading dropdown logic
+        document.getElementById('Category').addEventListener('change', function () {
+            var categoryName = this.value;
+            var subCategorySelect = document.getElementById('SubCategory');
+            subCategorySelect.innerHTML = '<option>Loading...</option>';
+
+            if (categoryName) {
+                fetch('/DailyJobs/GetSubCategories?categoryName=' + encodeURIComponent(categoryName))
+                    .then(response => response.json())
+                    .then(data => {
+                        subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                        data.forEach(function (subcat) {
+                            var opt = document.createElement('option');
+                            opt.value = subcat;
+                            opt.textContent = subcat;
+                            subCategorySelect.appendChild(opt);
+                        });
+                    })
+                    .catch(() => {
+                        subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                    });
+            } else {
+                subCategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+            }
+        });
+    </script>
+}
