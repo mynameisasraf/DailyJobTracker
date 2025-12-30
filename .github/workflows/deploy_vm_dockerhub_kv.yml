@@ -1,4 +1,4 @@
-name: Deploy custom image to VM
+name: Build and Deploy ASP.NET to Azure VM
 
 on:
   push:
@@ -7,16 +7,37 @@ on:
 
 env:
   RESOURCE_GROUP: rg-dailyjobtrackerNew
-  LOCATION: westus3   # DC-series SKUs are supported here; change if needed
+  LOCATION: westus3
   VM_NAME: vm-dailyjobtracker
   ADMIN_USERNAME: asraf
-  APP_PORT: 8080
-  IMAGE_NAME: ubuntu
-  IMAGE_TAG: resolute-20251208
+  APP_PORT: 80
+  IMAGE_NAME: mynameisasrafali/dailyjobtracker
+  IMAGE_TAG: latest
 
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push ASP.NET image
+        run: |
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
   provision-and-deploy:
     runs-on: ubuntu-latest
+    needs: build-and-push
     permissions:
       id-token: write
 
@@ -55,7 +76,7 @@ jobs:
           inlineScript: |
             az vm open-port -g $RESOURCE_GROUP -n $VM_NAME --port 80 --priority 1001
 
-      - name: Install Docker and run container
+      - name: Install Docker and run ASP.NET container
         uses: azure/cli@v2
         with:
           inlineScript: |
@@ -65,10 +86,10 @@ jobs:
               sudo apt-get install -y docker.io
               sudo systemctl enable --now docker
 
-              # Stop old container
+              # Stop old container if exists
               sudo docker rm -f dailyjobtracker || true
 
-              # Pull your custom image
+              # Pull the ASP.NET image built from GitHub
               sudo docker pull '"$IMAGE_NAME:$IMAGE_TAG"'
 
               # Run container
