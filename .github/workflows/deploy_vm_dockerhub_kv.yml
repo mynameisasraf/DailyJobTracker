@@ -7,7 +7,7 @@ on:
 
 env:
   RESOURCE_GROUP: rg-dailyjobtracker
-  LOCATION: eastus
+  LOCATION: eastus2   # DC-series SKUs are supported here; change if needed
   VM_NAME: vm-dailyjobtracker
   ADMIN_USERNAME: asraf
   APP_PORT: 8080
@@ -43,7 +43,7 @@ jobs:
                 -g $RESOURCE_GROUP \
                 -n $VM_NAME \
                 --image Ubuntu2204 \
-                --size Standard_B1s \
+                --size Standard_DC1ds_v3 \
                 --admin-username $ADMIN_USERNAME \
                 --generate-ssh-keys \
                 --public-ip-sku Standard
