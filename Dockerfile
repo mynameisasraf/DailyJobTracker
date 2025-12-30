@@ -3,10 +3,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY ./DailyJobTracker.sln ./
-COPY ./DailyJobTracker ./DailyJobTracker
+COPY . ./
 
-RUN dotnet restore DailyJobTracker/DailyJobTracker.csproj
-RUN dotnet publish DailyJobTracker/DailyJobTracker.csproj -c Release -o /app/publish
+RUN dotnet restore DailyJobTracker.csproj
+RUN dotnet publish DailyJobTracker.csproj -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
