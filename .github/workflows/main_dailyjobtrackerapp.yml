@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - dailyjobtrackerapp
 on:
   push:
     branches:
-      - main
+      - dev
   workflow_dispatch:
 
 jobs:
@@ -52,4 +52,5 @@ jobs:
           app-name: 'dailyjobtrackerapp'
           slot-name: 'Production'
           package: .
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_645BDBB4383141DEA5CC3EA00A62A14F }}
