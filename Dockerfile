@@ -2,16 +2,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ./DailyJobTracker.sln ./
-COPY . ./
+# Copy project files first for better caching
+COPY DailyJobTracker.csproj ./
+RUN dotnet restore
 
-RUN dotnet restore DailyJobTracker.csproj
-RUN dotnet publish DailyJobTracker.csproj -c Release -o /app/publish
+# Copy the rest of the source
+COPY . ./
+RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://0.0.0.0:8080
-EXPOSE 8080
+
+# Listen on port 80 inside container
+ENV ASPNETCORE_URLS=http://0.0.0.0:80
+EXPOSE 80
+
 ENTRYPOINT ["dotnet", "DailyJobTracker.dll"]
