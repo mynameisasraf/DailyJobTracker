@@ -91,29 +91,19 @@ jobs:
                 --backend-pool-name backendPool
             fi
 
-      - name: Install Docker and run ASP.NET container on VMSS instances
+      - name: Install Docker and run ASP.NET container using VMSS extension
         uses: azure/cli@v2
         with:
           inlineScript: |
-            for ID in 0 1; do
-              az vmss run-command invoke \
-                -g $RESOURCE_GROUP \
-                -n $VMSS_NAME \
-                --instance-id $ID \
-                --command-id RunShellScript \
-                --scripts '
-                  set -e
-                  sudo apt-get update
-                  sudo apt-get install -y docker.io
-                  sudo systemctl enable --now docker
-
-                  sudo docker rm -f dailyjobtracker || true
-                  sudo docker pull '"$IMAGE_NAME:$IMAGE_TAG"'
-                  sudo docker run -d --name dailyjobtracker -p 80:80 \
-                    -e ASPNETCORE_ENVIRONMENT=Production \
-                    '"$IMAGE_NAME:$IMAGE_TAG"'
-                '
-            done
+            az vmss extension set \
+              --resource-group $RESOURCE_GROUP \
+              --vmss-name $VMSS_NAME \
+              --name CustomScript \
+              --publisher Microsoft.Azure.Extensions \
+              --settings '{
+                "fileUris": [],
+                "commandToExecute": "bash -c \"sudo apt-get update && sudo apt-get install -y docker.io && sudo systemctl enable --now docker && sudo docker rm -f dailyjobtracker || true && sudo docker pull '"$IMAGE_NAME:$IMAGE_TAG"' && sudo docker run -d --name dailyjobtracker -p 80:80 '"$IMAGE_NAME:$IMAGE_TAG"'\""
+              }'
 
       - name: Output VMSS public IP
         uses: azure/cli@v2
