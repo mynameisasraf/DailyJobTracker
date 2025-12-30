@@ -42,7 +42,7 @@ jobs:
               az vm create \
                 -g $RESOURCE_GROUP \
                 -n $VM_NAME \
-                --image Canonical:UbuntuServer:22_04-lts:latest \
+                --image Ubuntu2204 \
                 --size Standard_B1s \
                 --admin-username $ADMIN_USERNAME \
                 --generate-ssh-keys \
@@ -61,7 +61,6 @@ jobs:
           inlineScript: |
             az vm run-command invoke -g $RESOURCE_GROUP -n $VM_NAME --command-id RunShellScript --scripts '
               set -e
-              # Install Docker
               sudo apt-get update
               sudo apt-get install -y docker.io
               sudo systemctl enable --now docker
