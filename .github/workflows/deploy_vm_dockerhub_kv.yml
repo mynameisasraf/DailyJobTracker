@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: rg-dailyjobtracker
-  LOCATION: eastus2   # DC-series SKUs are supported here; change if needed
+  RESOURCE_GROUP: rg-dailyjobtrackerNew
+  LOCATION: westus3   # DC-series SKUs are supported here; change if needed
   VM_NAME: vm-dailyjobtracker
   ADMIN_USERNAME: asraf
   APP_PORT: 8080
@@ -43,7 +43,7 @@ jobs:
                 -g $RESOURCE_GROUP \
                 -n $VM_NAME \
                 --image Ubuntu2204 \
-                --size Standard_DC1ds_v3 \
+                --size Standard_D2ls_v5 \
                 --admin-username $ADMIN_USERNAME \
                 --generate-ssh-keys \
                 --public-ip-sku Standard
