@@ -34,7 +34,7 @@ jobs:
           inlineScript: |
             az group create -n $RESOURCE_GROUP -l $LOCATION
 
-      - name: Create CentOS VM if missing
+      - name: Create Ubuntu VM if missing
         uses: azure/cli@v2
         with:
           inlineScript: |
@@ -42,7 +42,7 @@ jobs:
               az vm create \
                 -g $RESOURCE_GROUP \
                 -n $VM_NAME \
-                --image OpenLogic:CentOS:7.9:latest \
+                --image Canonical:UbuntuServer:22_04-lts:latest \
                 --size Standard_B1s \
                 --admin-username $ADMIN_USERNAME \
                 --generate-ssh-keys \
@@ -61,16 +61,15 @@ jobs:
           inlineScript: |
             az vm run-command invoke -g $RESOURCE_GROUP -n $VM_NAME --command-id RunShellScript --scripts '
               set -e
-              # Install Docker CE
-              sudo yum -y install yum-utils device-mapper-persistent-data lvm2
-              sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-              sudo yum -y install docker-ce docker-ce-cli containerd.io || sudo yum -y install docker
+              # Install Docker
+              sudo apt-get update
+              sudo apt-get install -y docker.io
               sudo systemctl enable --now docker
 
               # Stop old container
               sudo docker rm -f dailyjobtracker || true
 
-              # Pull your chosen image
+              # Pull your custom image
               sudo docker pull '"$IMAGE_NAME:$IMAGE_TAG"'
 
               # Run container
