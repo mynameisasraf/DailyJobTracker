@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: rg-dailyjobtrackerNew
+  RESOURCE_GROUP: RG-DockerVMSS
   LOCATION: westus3
-  VMSS_NAME: vmss-dailyjobtracker
+  VMSS_NAME: vmss-DockerImage
   ADMIN_USERNAME: asraf
   APP_PORT: 80
   IMAGE_NAME: mynameisasrafali/dailyjobtracker
@@ -16,6 +16,11 @@ env:
   KEYVAULT_NAME: kv-dailyjobtracker
   SECRET_DOCKER_USERNAME: dockerhub-username
   SECRET_DOCKER_TOKEN: dockerhub-token
+  lbName: VMSS
+  backendpoolname: VMSS-backendPool
+  VMSSImage: Ubuntu2204
+  VMSSInstancesCount: 2
+  vmssinssku: Standard_D2ls_v5
 
 jobs:
   build-and-push:
@@ -81,14 +86,14 @@ jobs:
               az vmss create \
                 -g $RESOURCE_GROUP \
                 -n $VMSS_NAME \
-                --image Ubuntu2204 \
-                --instance-count 2 \
-                --vm-sku Standard_D2ls_v5 \
+                --image $VMSSImage \
+                --instance-count $VMSSInstancesCount \
+                --vm-sku $vmssinssku \
                 --admin-username $ADMIN_USERNAME \
                 --generate-ssh-keys \
                 --upgrade-policy-mode automatic \
-                --lb lb-dailyjobtracker \
-                --backend-pool-name backendPool
+                --lb $lbName \
+                --backend-pool-name $backendpoolname
             fi
 
       - name: Install Docker and run ASP.NET container using VMSS extension
@@ -112,7 +117,7 @@ jobs:
             if ! az network lb probe show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name httpProbe >/dev/null 2>&1; then
               az network lb probe create \
                 --resource-group $RESOURCE_GROUP \
-                --lb-name lb-dailyjobtracker \
+                --lb-name $lbName \
                 --name httpProbe \
                 --protocol Tcp \
                 --port $APP_PORT
@@ -125,10 +130,10 @@ jobs:
             if ! az network lb outbound-rule show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name outboundRule >/dev/null 2>&1; then
               az network lb outbound-rule create \
                 --resource-group $RESOURCE_GROUP \
-                --lb-name lb-dailyjobtracker \
+                --lb-name $lbName \
                 --name outboundRule \
                 --frontend-ip-configs LoadBalancerFrontEnd \
-                --backend-pool-name backendPool \
+                --backend-pool-name $backendpoolname \
                 --protocol Tcp \
                 --idle-timeout 4 \
                 --enable-tcp-reset true
