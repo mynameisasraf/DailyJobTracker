@@ -133,7 +133,7 @@ jobs:
                 --lb-name $lbName \
                 --name outboundRule \
                 --frontend-ip-configs LoadBalancerFrontEnd \
-                --backend-pool-name $backendpoolname \
+                --address-pool $backendpoolname \
                 --protocol Tcp \
                 --idle-timeout 4 \
                 --enable-tcp-reset true
