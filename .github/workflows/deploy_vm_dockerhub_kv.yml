@@ -105,6 +105,35 @@ jobs:
                 "commandToExecute": "bash -c \"sudo apt-get update && sudo apt-get install -y docker.io && sudo systemctl enable --now docker && sudo docker rm -f dailyjobtracker || true && sudo docker pull '"$IMAGE_NAME:$IMAGE_TAG"' && sudo docker run -d --name dailyjobtracker -p 80:80 '"$IMAGE_NAME:$IMAGE_TAG"'\""
               }'
 
+      - name: Ensure Load Balancer health probe
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            if ! az network lb probe show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name httpProbe >/dev/null 2>&1; then
+              az network lb probe create \
+                --resource-group $RESOURCE_GROUP \
+                --lb-name lb-dailyjobtracker \
+                --name httpProbe \
+                --protocol Tcp \
+                --port $APP_PORT
+            fi
+
+      - name: Ensure outbound rule
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            if ! az network lb outbound-rule show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name outboundRule >/dev/null 2>&1; then
+              az network lb outbound-rule create \
+                --resource-group $RESOURCE_GROUP \
+                --lb-name lb-dailyjobtracker \
+                --name outboundRule \
+                --frontend-ip-configs LoadBalancerFrontEnd \
+                --backend-pool-name backendPool \
+                --protocol Tcp \
+                --idle-timeout 4 \
+                --enable-tcp-reset true
+            fi
+
       - name: Output VMSS public IP
         uses: azure/cli@v2
         with:
