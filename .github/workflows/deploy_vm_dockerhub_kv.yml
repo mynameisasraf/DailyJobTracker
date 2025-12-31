@@ -123,6 +123,24 @@ jobs:
                 --port $APP_PORT
             fi
 
+      - name: Ensure Load Balancer rule with probe and SNAT disabled
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            if ! az network lb rule show -g $RESOURCE_GROUP --lb-name $lbName --name httpRule >/dev/null 2>&1; then
+              az network lb rule create \
+                --resource-group $RESOURCE_GROUP \
+                --lb-name $lbName \
+                --name httpRule \
+                --protocol Tcp \
+                --frontend-port $APP_PORT \
+                --backend-port $APP_PORT \
+                --frontend-ip-name LoadBalancerFrontEnd \
+                --backend-pool-name $backendpoolname \
+                --probe-name httpProbe \
+                --disable-outbound-snat true
+            fi
+
       - name: Ensure outbound rule
         uses: azure/cli@v2
         with:
@@ -138,17 +156,6 @@ jobs:
                 --idle-timeout 4 \
                 --enable-tcp-reset true
             fi
-
-      - name: Update Load Balancer rule to use probe and disable SNAT
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az network lb rule update \
-              --resource-group $RESOURCE_GROUP \
-              --lb-name $lbName \
-              --name httpRule \
-              --disable-outbound-snat true \
-              --probe-name httpProbe
 
       - name: Output VMSS public IP
         uses: azure/cli@v2
