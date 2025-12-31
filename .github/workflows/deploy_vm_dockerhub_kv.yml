@@ -114,7 +114,7 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            if ! az network lb probe show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name httpProbe >/dev/null 2>&1; then
+            if ! az network lb probe show -g $RESOURCE_GROUP --lb-name $lbName --name httpProbe >/dev/null 2>&1; then
               az network lb probe create \
                 --resource-group $RESOURCE_GROUP \
                 --lb-name $lbName \
@@ -127,7 +127,7 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            if ! az network lb outbound-rule show -g $RESOURCE_GROUP --lb-name lb-dailyjobtracker --name outboundRule >/dev/null 2>&1; then
+            if ! az network lb outbound-rule show -g $RESOURCE_GROUP --lb-name $lbName --name outboundRule >/dev/null 2>&1; then
               az network lb outbound-rule create \
                 --resource-group $RESOURCE_GROUP \
                 --lb-name $lbName \
@@ -138,6 +138,17 @@ jobs:
                 --idle-timeout 4 \
                 --enable-tcp-reset true
             fi
+
+      - name: Update Load Balancer rule to use probe and disable SNAT
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az network lb rule update \
+              --resource-group $RESOURCE_GROUP \
+              --lb-name $lbName \
+              --name httpRule \
+              --disable-outbound-snat true \
+              --probe-name httpProbe
 
       - name: Output VMSS public IP
         uses: azure/cli@v2
