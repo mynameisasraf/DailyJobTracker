@@ -20,7 +20,7 @@ env:
   backendpoolname: VMSS-backendPool
   VMSSImage: Ubuntu2204
   VMSSInstancesCount: 2
-  vmssinssku: Standard_D2ls_v5
+  vmssinssku: Standard_B2s
 
 jobs:
   build-and-push:
